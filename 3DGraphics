@@ -1,0 +1,112 @@
+from OpenGL.GL import *
+from OpenGL.GLU import *    ##전부 import하기
+
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
+from PyQt6.QtOpenGLWidgets import QOpenGLWidget
+
+from PyQt6.QtWidgets import QSlider #############
+from PyQt6.QtCore import * #### Qt.orientation.Horizontal
+
+import sys
+
+#### MyWindow class start ################################
+class MyGLWindow(QOpenGLWidget) : # QMainWindow 상속!!! 이름은 상관없음.
+    def __init__ (self):
+        super().__init__() # 슈퍼클래스 QMainWindow 생성자 실행
+        self.r = 1.0
+        self.g = 0.0
+        self.b = 0.0
+
+        self.setWindowTitle('나의 첫 OpenGL 앱')
+
+    def initializeGL(self):
+        glClearColor(0.1, 0.4, 0.7, 1.0)
+    
+    def resizeGL(self, w: int, h: int):
+        pass
+
+    def paintGL(self):
+        glClear(GL_COLOR_BUFFER_BIT | GL_COLOR_BUFFER_BIT)
+
+        ### ???? 아직은 모르지만 모든 OpenGL 코드가 이렇게 한다
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+
+        glColor3f(self.r, self.g, self.b)
+        glBegin(GL_TRIANGLES) ## 지금부터 들어오는건 삼각형 정보니까 네가 알아서 3개씩 묶어서 그리렴
+        #glColor3f(1,1,0)    ## 상태를 노란색~으로
+        glVertex3f(-1,0,0)
+        glVertex3f(1,0,0)
+        glVertex3f(0,1,0)
+        #glColor3f(0,1,1)
+        glVertex3f(-1,0.5,0)
+        glVertex3f(1,0.5,0)
+        glVertex3f(0,-0.5,0)
+        
+        glEnd()
+
+    def setR(self, val):    ##RGB코드를 set하기 위해 따로 뺀 메서드
+        self.r = val/ 99
+        self.update()
+    def setG(self, val):
+        self.g = val /99
+        self.update()
+    def setB(self, val):
+        self.b = val /99
+        self.update()
+
+'''
+        self.label = QLabel()
+        self.input = QLineEdit()
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.label)
+        layout.addWidget(self.input)
+
+        container = QWidget()
+        container.setLayout(layout)
+
+        self.setCentralWidget(container)
+
+        self.input.textChanged.connect(self.label.setText) 
+'''
+
+#### MyWindow 클래스의 끝 #################################
+
+class MyWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle('슬라이더로 색상 제어하기~')
+
+        ### Graphics User Interface 설정
+        centralWidset = QWidget()
+        self.setCentralWidget(centralWidset)
+
+        layout = QVBoxLayout()
+        centralWidset.setLayout(layout)
+
+        self.glWidget = MyGLWindow()
+        layout.addWidget(self.glWidget)
+
+        sliderR = QSlider(Qt.Orientation.Horizontal)
+        layout.addWidget(sliderR)
+        sliderG = QSlider(Qt.Orientation.Horizontal)
+        layout.addWidget(sliderG)
+        sliderB = QSlider(Qt.Orientation.Horizontal)
+        layout.addWidget(sliderB)
+
+        ### 슬라이더 변경시에 연결된 동작 지정
+        sliderR.valueChanged.connect(self.glWidget.setR)
+        sliderG.valueChanged.connect(self.glWidget.setG)
+        sliderB.valueChanged.connect(self.glWidget.setB)
+    
+
+def main(argv = sys.argv):
+    ## 윈도우 생성하기
+    app = QApplication(argv)
+    window = MyWindow() # 인자가 없음. 
+    window.show()
+    app.exec()
+
+if __name__ == '__main__':  # 음... 다른 코드에서 import시켜서 class를 만들 때....는 main이 아니라서 실행이 안 된다..?
+    main(sys.argv)
