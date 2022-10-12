@@ -1,0 +1,171 @@
+from OpenGL.GL import *
+from OpenGL.GLU import *
+
+import sys
+
+from PyQt6.QtWidgets import *
+from PyQt6.QtOpenGLWidgets import QOpenGLWidget
+from PyQt6.QtCore import *
+import math
+
+def drawAxes():
+    glBegin(GL_LINES)
+    glColor3f(1,0,0) # red x axis
+    glVertex3f(0,0,0); glVertex3f(1,0,0) #권장되는 방식은 아니지만 가독성을 위해 ;으로 줄 표현이 가능함
+    glColor3f(0,1,0) # green y axis
+    glVertex3f(0,0,0); glVertex3f(0,1,0)
+    glColor3f(0,0,1) # blue z axis
+    glVertex3f(0,0,0); glVertex3f(0,0,1)
+    glEnd()
+
+def drawHelix():
+    glColor3f(1,1,1)
+    glBegin(GL_LINE_STRIP)
+    for i in range(1000):
+        angle = i/10
+        x, y = math.cos(angle), math.sin(angle)
+        glVertex3f(x,y,angle/10)
+    glEnd()
+
+def drawBox(l, r, b, t, n, f): #glOrtho가 만드는 공간(육면체)을 가시화... 해보기
+    glColor3f(1,1,1)
+    glBegin(GL_LINE_LOOP)
+    #앞면
+    glVertex3f(l,t,n)
+    glVertex3f(l,b,n)
+    glVertex3f(r,b,n)
+    glVertex3f(r,t,n)
+    glEnd()
+    glBegin(GL_LINE_LOOP)
+    #뒷면
+    glVertex3f(l,t,f)
+    glVertex3f(l,b,f)
+    glVertex3f(r,b,f)
+    glVertex3f(r,t,f)
+    glEnd()
+
+    glBegin(GL_LINES)
+    
+    glVertex3f(l,t,n); glVertex3f(l,t,f)
+    glVertex3f(l,b,n); glVertex3f(l,b,f)
+    glVertex3f(r,b,n); glVertex3f(r,b,f)
+    glVertex3f(r,t,n); glVertex3f(r,t,f)
+    glEnd()
+
+
+
+
+
+    
+class MyGLWidget(QOpenGLWidget):
+    def __init__(self, parent=None, observation = False): #한 쪽은 관측용도
+        super().__init__(parent)
+        self.observation = observation
+
+        self.left = self.bottom = self.near = -2
+        self.right = self.top = self.far = 2
+
+    def initializeGL(self):
+        pass
+    def resizeGL(self, w, h):
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        if self.observation:
+            glOrtho(-4, 4, -4, 4, -10, 100)
+        else:
+            glOrtho(self.left, self.right, self.bottom, self.top, self.near, self.far)
+        
+    def paintGL(self):
+
+        self.projection_update()
+
+        glClear(GL_COLOR_BUFFER_BIT)
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+
+        if self.observation:
+            gluLookAt(
+                1, 0.7, 0.5, #눈의 위치
+                0, 0, 0, # 쳐다보는 목표 지점 위치
+                0, 1, 0  #카메라의 상향 벡터 /윗쪽을 향하도록.. 수평을 이루면서 각도가 이동함
+            )
+        drawAxes()
+        drawHelix()
+        drawBox(self.left, self.right, self.bottom, self.top, self.near, self.far)
+
+    def projection_update(self):
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        if self.observation:
+            glOrtho(-4, 4, -4, 4, -10, 100)
+        else:
+            glOrtho(self.left, self.right, self.bottom, self.top, self.near, self.far)
+        #if not self.observation:
+            #glOrtho(self.left, self.right, self.bottom, self.top, self.near, self.far)
+
+
+class MyWindow(QMainWindow):
+    def __init__(self, title = ''):
+        super().__init__()
+        self.setWindowTitle(title)
+
+        ##GUI 설정
+        central_Widget = QWidget()
+        self.setCentralWidget(central_Widget)
+        gui_layout = QHBoxLayout()
+
+        central_Widget.setLayout(gui_layout)
+
+        self.glWidget1 = MyGLWidget()
+        self.glWidget2 = MyGLWidget(observation= True)
+
+        gui_layout.addWidget(self.glWidget1)
+        gui_layout.addWidget(self.glWidget2)
+
+    def keyPressEvent(self, e):
+        if e.key() == Qt.key.key_A:
+            self.glWidget1.left -= 0.1
+            self.glWidget2.left -= 0.1
+        elif e.key() == Qt.key.key_S:
+            self.glWidget1.left += 0.1
+            self.glWidget2.left += 0.1
+        elif e.key() == Qt.key.key_D:
+            self.glWidget1.right -= 0.1
+            self.glWidget2.right -= 0.1
+        elif e.key() == Qt.key.key_F:
+            self.glWidget1.right += 0.1
+            self.glWidget2.right += 0.1
+
+        elif e.key() == Qt.key.key_Q:
+            self.glWidget1.top -= 0.1
+            self.glWidget2.top -= 0.1 
+        elif e.key() == Qt.key.key_W:
+            self.glWidget1.top += 0.1
+            self.glWidget2.top += 0.1
+
+        elif e.key() == Qt.key.key_Z:
+            self.glWidget1.near -= 0.1
+            self.glWidget2.near -= 0.1 
+        elif e.key() == Qt.key.key_X:
+            self.glWidget1.near += 0.1
+            self.glWidget2.near += 0.1
+
+        elif e.key() == Qt.key.key_C:
+            self.glWidget1.far -= 0.1
+            self.glWidget2.far -= 0.1 
+        elif e.key() == Qt.key.key_V:
+            self.glWidget1.far += 0.1
+            self.glWidget2.far += 0.1         
+
+        self.glWidget1.update()
+        self.glWidget2.update()
+       
+def main(argv = sys.argv):
+    app = QApplication(argv)
+    window = MyWindow('glOrtho 관측') #QMainWindow()
+    window.setFixedSize(1200, 600)
+    window.show()
+    app.exec()
+
+if __name__ == '__main__':
+    main(sys.argv)
