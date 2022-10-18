@@ -62,3 +62,24 @@ game_list.print_all()
 game_list.insert(1, '장기', 0.001)
 print("#### 장기를 추가한 후 ####")
 game_list.print_all()
+
+
+##친구추가선형리스트
+
+kakao_list = [('다현',200),('사나',30)]
+while True:
+    name = input('추가할 친구 --> ')
+    if name == 'EXIT' or name == 'exit':
+        break
+    count = int(input('카톡 횟수 --> '))
+    new_item= (name, count)
+
+    pos = 0
+    for name, num in kakao_list:
+        if count < num:
+            pos += 1
+            
+    kakao_list.insert(pos, new_item)
+    print(kakao_list)
+
+
