@@ -1,0 +1,64 @@
+(python)
+
+##gameLinkedList
+
+class Node:
+    def __init__(self, game = None, share = 0.0):
+        self.gameName = game
+        self.share = share #next(java,python), link(C,C++), 등등 참조해야할 것이 필요
+        self.next = None
+game_node = Node("리그오브레전드")
+
+
+class LinkedList:
+    def __init__(self, game, share):
+        self.head = Node(game, share)
+        
+    def append(self, game, share):
+        current = self.head
+        while current.next is not None:
+            current = current.next    
+        current.next = Node(game, share)
+    
+    def print_all(self):
+        current = self.head
+        while current is not None:
+            print("게임이름: ", current.gameName,
+                  "점유율: ", current.share)
+            current = current.next
+            
+    def insert(self, pos, game, share):
+        new_node = Node(game, share)
+        if pos == 0:
+            new_node.next = self.head
+            self.head = new_node
+            return
+        node = self.get_node(pos-1)
+        new_node.next = node.next
+        node.next = new_node
+        
+    def get_node(self, pos):
+        count = 0
+        current = self.head
+        while count < pos :
+            current = current.next
+            count += 1
+        return current
+
+    def delete_node(self, pos):
+        if pos == 0:
+            self.head = self.head.next
+            return
+        node = self.get_node(pos-1)
+        node.next = node.next.next
+
+
+
+game_list = LinkedList("리그오브레전드", 0.4)
+game_list.append("배그", 0.14)
+game_list.append("옵치", 0.07)
+game_list.insert(1, '피파온라인', 0.15)
+game_list.print_all()
+game_list.insert(1, '장기', 0.001)
+print("#### 장기를 추가한 후 ####")
+game_list.print_all()
