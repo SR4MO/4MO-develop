@@ -1,3 +1,7 @@
+'''
+python
+
+
 from OpenGL.GL import *
 from OpenGL.GLU import *    ##전부 import하기
 
@@ -120,3 +124,5 @@ def main(argv = sys.argv):
 
 if __name__ == '__main__':  # 음... 다른 코드에서 import시켜서 class를 만들 때....는 main이 아니라서 실행이 안 된다..?
     main(sys.argv)
+    
+'''
