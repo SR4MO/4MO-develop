@@ -1,4 +1,4 @@
-```python
+```py
 
 from OpenGL.GL import *
 from OpenGL.GLU import *    ##전부 import하기
